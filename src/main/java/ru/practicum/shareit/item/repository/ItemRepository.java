@@ -6,17 +6,16 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Repository
 public class ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
-    private final AtomicLong counter = new AtomicLong(0);
+    private long counter = 0;
 
     public Item createItem(Item item, User owner) {
         if (item.getId() == null) {
-            item.setId(counter.incrementAndGet());
+            item.setId(++counter);
         }
         item.setOwner(owner);
         items.put(item.getId(), item);

@@ -6,17 +6,16 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class UserRepository {
     private final Map<Long, User> users = new HashMap<>();
-    private final AtomicLong counter = new AtomicLong(0);
+    private long counter = 0;
 
     public User createUser(User user) {
         checkEmailUniqueness(user.getEmail());
         if (user.getId() == null) {
-            user.setId(counter.incrementAndGet());
+            user.setId(++counter);
         }
         users.put(user.getId(), user);
         return user;

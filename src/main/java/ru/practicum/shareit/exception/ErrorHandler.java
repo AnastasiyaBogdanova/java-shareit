@@ -5,26 +5,25 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Map;
-
 @RestControllerAdvice
 public class ErrorHandler {
 
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleConflictException(ConflictException e) {
-        return Map.of(
-                "error", "Ошибка валидации данных",
-                "description", e.getMessage()
-        );
+    public ErrorResponseDto handleConflictException(ConflictException e) {
+        return ErrorResponseDto.builder()
+                .error("Ошибка валидации данных")
+                .description(e.getMessage())
+                .build();
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NotFoundException e) {
-        return Map.of("error", "Объект не найден",
-                "description", e.getMessage()
-        );
+    public ErrorResponseDto handleNotFoundException(NotFoundException e) {
+        return ErrorResponseDto.builder()
+                .error("Объект не найден")
+                .description(e.getMessage())
+                .build();
     }
 
 }

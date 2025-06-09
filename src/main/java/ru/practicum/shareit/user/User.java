@@ -1,6 +1,5 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.user;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class User {
     private Long id;
     private String name;
-    @Email(message = "Email не корректен")
     private String email;
 }

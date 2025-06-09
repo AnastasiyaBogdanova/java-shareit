@@ -1,9 +1,7 @@
-package ru.practicum.shareit.item.repository;
+package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,39 +11,37 @@ public class ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private long counter = 0;
 
-    public Item createItem(Item item, User owner) {
+    public Item createItem(Item item) {
         if (item.getId() == null) {
             item.setId(++counter);
         }
-        item.setOwner(owner);
         items.put(item.getId(), item);
         return item;
     }
 
     public Item updateItem(Long userId, Long itemId, Item itemUpdates) {
-        Item existingItem = findById(itemId);
+        Optional<Item> existingItem = findById(itemId);
 
-        if (!existingItem.getOwner().getId().equals(userId)) {
+        if (!existingItem.get().getOwner().getId().equals(userId)) {
             throw new NotFoundException("Пользователь не является владельцем вещи");
         }
 
         if (itemUpdates.getName() != null) {
-            existingItem.setName(itemUpdates.getName());
+            existingItem.get().setName(itemUpdates.getName());
         }
         if (itemUpdates.getDescription() != null) {
-            existingItem.setDescription(itemUpdates.getDescription());
+            existingItem.get().setDescription(itemUpdates.getDescription());
         }
         if (itemUpdates.getAvailable() != null) {
-            existingItem.setAvailable(itemUpdates.getAvailable());
+            existingItem.get().setAvailable(itemUpdates.getAvailable());
         }
 
-        items.put(itemId, existingItem);
-        return existingItem;
+        items.put(itemId, existingItem.get());
+        return existingItem.get();
     }
 
-    public Item findById(Long id) {
-        return Optional.ofNullable(items.get(id))
-                .orElseThrow(() -> new NotFoundException("Вещь с ID " + id + " не найдена"));
+    public Optional<Item> findById(Long id) {
+        return Optional.ofNullable(items.get(id));
     }
 
     public List<Item> findByOwnerId(Long ownerId) {

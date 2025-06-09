@@ -1,18 +1,20 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.item;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.User;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class Item {
     private Long id;
     private String name;
-    @Email(message = "Email не корректен")
-    private String email;
+    private String description;
+    private Boolean available;
+    private User owner;
+    private Long request;
 }

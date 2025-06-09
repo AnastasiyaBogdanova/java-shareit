@@ -1,9 +1,8 @@
-package ru.practicum.shareit.user.repository;
+package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
@@ -22,24 +21,23 @@ public class UserRepository {
     }
 
     public User updateUser(Long id, User newUser) {
-        User oldUser = findById(id);
+        Optional<User> oldUser = findById(id);
         if (newUser.getName() != null) {
-            oldUser.setName(newUser.getName());
+            oldUser.get().setName(newUser.getName());
         }
         if (newUser.getEmail() != null) {
-            oldUser.setEmail(newUser.getEmail());
+            oldUser.get().setEmail(newUser.getEmail());
         }
         if (newUser.getEmail() != null && !newUser.getEmail().isBlank()) {
             checkEmailUniquenessForUpdate(newUser.getEmail(), id);
         }
 
-        users.put(id, oldUser);
-        return oldUser;
+        users.put(id, oldUser.get());
+        return oldUser.get();
     }
 
-    public User findById(Long id) {
-        return Optional.ofNullable(users.get(id))
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + id + " не найден"));
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     public List<User> findAll() {

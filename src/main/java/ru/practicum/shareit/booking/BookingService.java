@@ -24,8 +24,7 @@ public class BookingService {
     private final BookingMapper bookingMapper;
 
     public BookingDto createBooking(BookingRequestDto bookingRequestDto, Long userId) {
-        User booker = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+        User booker = getUser(userId);
         Item item = itemRepository.findById(bookingRequestDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь с ID " + bookingRequestDto.getItemId() + " не найдена"));
 
@@ -35,13 +34,14 @@ public class BookingService {
         if (item.getOwner().getId().equals(userId)) {
             throw new NotAvailableException("Пользователь не может забронировать свою же вещь");
         }
-        Booking booking = bookingMapper.toEntity(bookingRequestDto, item, booker);
+        Booking booking = bookingMapper.toEntity(bookingRequestDto);
+        booking.setItem(item);
+        booking.setBooker(booker);
         return bookingMapper.toDto(bookingRepository.save(booking));
     }
 
     public BookingDto approveBooking(Long bookingId, Long userId, boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование не найдено: " + bookingId));
+        Booking booking = getBooking(bookingId);
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new NotAvailableException("Только владелец может одобрить бронирование");
@@ -55,8 +55,7 @@ public class BookingService {
     }
 
     public BookingDto getBookingById(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
+        Booking booking = getBooking(bookingId);
 
         if (!booking.getBooker().getId().equals(userId) &&
                 !booking.getItem().getOwner().getId().equals(userId)) {
@@ -67,9 +66,7 @@ public class BookingService {
     }
 
     public List<BookingDto> getUserBookings(Long userId, BookingState state) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-
+        getUser(userId);
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case ALL:
@@ -97,4 +94,15 @@ public class BookingService {
                 throw new NotFoundException("Неизвестный статус: " + state);
         }
     }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+    }
+
+    private Booking getBooking(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование не найдено: " + bookingId));
+    }
 }
+

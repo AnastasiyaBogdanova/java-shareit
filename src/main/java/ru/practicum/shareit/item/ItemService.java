@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoForCreate;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,8 +32,7 @@ public class ItemService {
     private final CommentMapper commentMapper;
 
     public ItemDto createItem(Long userId, ItemDtoForCreate itemDto) {
-        User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+        User owner = findUserById(userId);
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(owner);
         Item savedItem = itemRepository.save(item);
@@ -40,8 +40,7 @@ public class ItemService {
     }
 
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
-        Item existingItem = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь с ID " + itemId + " не найдена"));
+        Item existingItem = findItemById(itemId);
 
         if (!existingItem.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Пользователь не является владельцем вещи");
@@ -61,7 +60,7 @@ public class ItemService {
     }
 
     public List<ItemDto> getUserItems(Long userId) {
-        userRepository.findById(userId);
+        findUserById(userId);
 
         return new ArrayList<>(itemMapper.toDto(itemRepository.findByOwnerId(userId)));
     }
@@ -70,14 +69,13 @@ public class ItemService {
         if (text.isEmpty() || text.isBlank()) {
             return new ArrayList<>();
         }
-        userRepository.findById(userId);
+        findUserById(userId);
 
         return new ArrayList<>(itemMapper.toDto(itemRepository.searchAvailableItems(text)));
     }
 
     public ItemDto getItemById(Long itemId, Long userId) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь с ID " + itemId + " не найдена"));
+        Item item = findItemById(itemId);
 
         ItemDto itemDto = itemMapper.toDto(item);
 
@@ -101,27 +99,38 @@ public class ItemService {
                         itemDto.getId(), now, BookingStatus.APPROVED);
 
         if (lastBooking != null) {
-            itemDto.setLastBooking(new Booker(
-                    lastBooking.getId(), lastBooking.getBooker().getId()));
+            itemDto.setLastBooking(new UserShortDto(
+                    lastBooking.getId(), lastBooking.getBooker().getName()));
         }
         if (nextBooking != null) {
-            itemDto.setNextBooking(new Booker(
-                    nextBooking.getId(), nextBooking.getBooker().getId()));
+            itemDto.setNextBooking(new UserShortDto(
+                    nextBooking.getId(), nextBooking.getBooker().getName()));
         }
     }
 
     public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
-        User author = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь с ID " + itemId + " не найдена"));
+        User author = findUserById(userId);
+        Item item = findItemById(itemId);
 
         if (!bookingRepository.existsByBookerIdAndItemIdAndEndBefore(
                 userId, itemId, LocalDateTime.now())) {
             throw new NotAvailableException("Пользователь не может забронировать свою же вещь");
         }
 
-        Comment comment = commentMapper.toEntity(commentDto, item, author);
+        Comment comment = commentMapper.toEntity(commentDto);
+        comment.setItem(item);
+        comment.setAuthor(author);
         return commentMapper.toDto(commentRepository.save(comment));
     }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + id + " не найден"));
+    }
+
+    private Item findItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Вещь с ID " + id + " не найдена"));
+    }
+
 }

@@ -22,8 +22,7 @@ public class UserService {
     }
 
     public UserDto updateUser(Long userId, UserDto user) {
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+        User existingUser = findUserById(userId);
 
         if (user.getName() != null) {
             existingUser.setName(user.getName());

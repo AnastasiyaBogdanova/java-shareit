@@ -2,16 +2,12 @@ package ru.practicum.shareit.comment;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.comment.dto.CommentDto;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
 
 @Component
 public class CommentMapper {
-    public Comment toEntity(CommentDto dto, Item item, User author) {
+    public Comment toEntity(CommentDto dto) {
         return Comment.builder()
                 .text(dto.getText())
-                .item(item)
-                .author(author)
                 .build();
     }
 

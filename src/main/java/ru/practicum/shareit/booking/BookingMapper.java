@@ -3,20 +3,17 @@ package ru.practicum.shareit.booking;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserShortDto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Component
 public class BookingMapper {
-    public Booking toEntity(BookingRequestDto dto, Item item, User booker) {
+    public Booking toEntity(BookingRequestDto dto) {
         return Booking.builder()
                 .start(dto.getStart())
                 .end(dto.getEnd())
-                .item(item)
-                .booker(booker)
                 .status(BookingStatus.WAITING)
                 .build();
     }
@@ -33,7 +30,7 @@ public class BookingMapper {
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .item(booking.getItem())
-                .booker(new Booker(booking.getBooker().getId(), booking.getBooker().getName()))
+                .booker(new UserShortDto(booking.getBooker().getId(), booking.getBooker().getName()))
                 .status(booking.getStatus())
                 .build();
     }

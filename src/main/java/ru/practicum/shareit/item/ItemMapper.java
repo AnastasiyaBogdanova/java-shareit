@@ -15,6 +15,7 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .requestId(item.getRequest())
+                .comments(item.getComments())
                 .build();
     }
 

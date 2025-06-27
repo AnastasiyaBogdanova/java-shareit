@@ -26,4 +26,12 @@ public class ErrorHandler {
                 .build();
     }
 
+    @ExceptionHandler(NotAvailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDto handleNotAvailableException(NotAvailableException e) {
+        return ErrorResponseDto.builder()
+                .error("Вещь недоступна для бронирования")
+                .description(e.getMessage())
+                .build();
+    }
 }
